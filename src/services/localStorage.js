@@ -233,7 +233,7 @@ export const updateProfile = (userId, updates) => {
     }
 
     // Update user data (kecuali email, password, role, id)
-    const allowedUpdates = ['name', 'phone', 'address', 'skills', 'portfolio'];
+    const allowedUpdates = ['name', 'phone', 'address', 'skills', 'portfolio', 'company', 'bio', 'description'];
     const filteredUpdates = {};
     
     Object.keys(updates).forEach(key => {

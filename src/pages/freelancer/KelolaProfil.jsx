@@ -8,12 +8,12 @@ function KelolaProfil() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    nama: '',
+    name: '',
     email: '',
-    noTelp: '',
-    deskripsi: '',
-    keahlian: '',
-    portofolio: '' // Note: Backend expects portofolioUrl
+    phone: '',
+    description: '',
+    skills: '',
+    portfolio: ''
   });
 
   useEffect(() => {
@@ -27,12 +27,12 @@ function KelolaProfil() {
       if (response.data.success) {
         const user = response.data.user;
         setFormData({
-          nama: user.nama || '',
+          name: user.name || '',
           email: user.email || '',
-          noTelp: user.noTelp || '',
-          deskripsi: user.deskripsi || '',
-          keahlian: Array.isArray(user.keahlian) ? user.keahlian.join(', ') : (user.keahlian || ''),
-          portofolio: user.portofolioUrl || user.cvUrl || ''
+          phone: user.phone || '',
+          description: user.description || '',
+          skills: Array.isArray(user.skills) ? user.skills.join(', ') : (user.skills || ''),
+          portfolio: user.portfolio || ''
         });
       }
     } catch (err) {
@@ -52,21 +52,17 @@ function KelolaProfil() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Backend expects 'portofolioUrl' and 'keahlian' as comma separated string or array (controller handles both)
+      // Convert skills string to array
       const dataToSend = {
-        ...formData,
-        portofolioUrl: formData.portofolio
+        name: formData.name,
+        phone: formData.phone,
+        skills: formData.skills.split(',').map(s => s.trim()).filter(s => s),
+        portfolio: formData.portfolio
       };
       
       const response = await userAPI.updateProfile(dataToSend);
       if (response.data.success) {
         alert('Profil berhasil diperbarui!');
-        // Update stored user data if needed
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (storedUser) {
-          storedUser.nama = formData.nama;
-          localStorage.setItem('user', JSON.stringify(storedUser));
-        }
         navigate('/freelancer/dashboard');
       }
     } catch (err) {
@@ -103,8 +99,8 @@ function KelolaProfil() {
                 <label>Nama Lengkap</label>
                 <input
                   type="text"
-                  value={formData.nama}
-                  onChange={(e) => setFormData({...formData, nama: e.target.value})}
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
                   required
                 />
               </div>
@@ -116,6 +112,9 @@ function KelolaProfil() {
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
+                  disabled
+                  style={{backgroundColor: '#f5f5f5', cursor: 'not-allowed'}}
+                  title="Email tidak dapat diubah"
                 />
               </div>
 
@@ -123,8 +122,8 @@ function KelolaProfil() {
                 <label>Nomor Telepon</label>
                 <input
                   type="tel"
-                  value={formData.noTelp}
-                  onChange={(e) => setFormData({...formData, noTelp: e.target.value})}
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   required
                 />
               </div>
@@ -133,10 +132,9 @@ function KelolaProfil() {
                 <label>Deskripsi Profil</label>
                 <textarea
                   rows="4"
-                  value={formData.deskripsi}
-                  onChange={(e) => setFormData({...formData, deskripsi: e.target.value})}
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
                   placeholder="Ceritakan tentang keahlian dan pengalaman Anda..."
-                  required
                 ></textarea>
               </div>
 
@@ -144,8 +142,8 @@ function KelolaProfil() {
                 <label>Keahlian (pisahkan dengan koma)</label>
                 <input
                   type="text"
-                  value={formData.keahlian}
-                  onChange={(e) => setFormData({...formData, keahlian: e.target.value})}
+                  value={formData.skills}
+                  onChange={(e) => setFormData({...formData, skills: e.target.value})}
                   placeholder="Contoh: Design, Web Development, Content Writing"
                   required
                 />
@@ -155,8 +153,8 @@ function KelolaProfil() {
                 <label>Link Portfolio (Opsional)</label>
                 <input
                   type="url"
-                  value={formData.portofolio}
-                  onChange={(e) => setFormData({...formData, portofolio: e.target.value})}
+                  value={formData.portfolio}
+                  onChange={(e) => setFormData({...formData, portfolio: e.target.value})}
                   placeholder="https://..."
                 />
               </div>

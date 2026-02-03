@@ -10,11 +10,11 @@ function CustomerProfil() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    nama: '',
+    name: '',
     email: '',
-    noTelp: '',
-    alamat: '',
-    perusahaan: '',
+    phone: '',
+    address: '',
+    company: '',
     bio: ''
   });
 
@@ -29,11 +29,11 @@ function CustomerProfil() {
       if (response.data.success) {
         const user = response.data.user;
         setFormData({
-          nama: user.nama || '',
+          name: user.name || '',
           email: user.email || '',
-          noTelp: user.noTelp || '',
-          alamat: user.alamat || '',
-          perusahaan: user.perusahaan || '',
+          phone: user.phone || '',
+          address: user.address || '',
+          company: user.company || '',
           bio: user.bio || ''
         });
       }
@@ -58,12 +58,7 @@ function CustomerProfil() {
       if (response.data.success) {
         setIsEditing(false);
         alert('Profil berhasil diperbarui!');
-        // Update stored user data if name changed
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (storedUser) {
-          storedUser.nama = formData.nama;
-          localStorage.setItem('user', JSON.stringify(storedUser));
-        }
+        fetchProfile(); // Refresh profile data
       }
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -99,10 +94,10 @@ function CustomerProfil() {
           <div className="card profile-header-card">
             <div className="profile-avatar-section">
               <div className="profile-avatar">
-                <span className="avatar-text">{formData.nama.charAt(0)}</span>
+                <span className="avatar-text">{formData.name?.charAt(0) || 'C'}</span>
               </div>
               <div className="profile-header-info">
-                <h2>{formData.nama}</h2>
+                <h2>{formData.name}</h2>
                 <p>{formData.email}</p>
                 <span className="profile-badge">Customer</span>
               </div>
@@ -126,8 +121,8 @@ function CustomerProfil() {
                     <span className="input-icon">👤</span>
                     <input
                       type="text"
-                      value={formData.nama}
-                      onChange={(e) => setFormData({...formData, nama: e.target.value})}
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
                       disabled={!isEditing}
                       style={{paddingLeft: '50px'}}
                     />
@@ -154,8 +149,8 @@ function CustomerProfil() {
                     <span className="input-icon">📱</span>
                     <input
                       type="tel"
-                      value={formData.noTelp}
-                      onChange={(e) => setFormData({...formData, noTelp: e.target.value})}
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       disabled={!isEditing}
                       style={{paddingLeft: '50px'}}
                     />
@@ -168,8 +163,8 @@ function CustomerProfil() {
                     <span className="input-icon">🏢</span>
                     <input
                       type="text"
-                      value={formData.perusahaan}
-                      onChange={(e) => setFormData({...formData, perusahaan: e.target.value})}
+                      value={formData.company}
+                      onChange={(e) => setFormData({...formData, company: e.target.value})}
                       disabled={!isEditing}
                       style={{paddingLeft: '50px'}}
                     />
@@ -181,8 +176,8 @@ function CustomerProfil() {
                   <div className="input-wrapper">
                     <span className="input-icon" style={{alignSelf: 'flex-start', paddingTop: '14px'}}>📍</span>
                     <textarea
-                      value={formData.alamat}
-                      onChange={(e) => setFormData({...formData, alamat: e.target.value})}
+                      value={formData.address}
+                      onChange={(e) => setFormData({...formData, address: e.target.value})}
                       disabled={!isEditing}
                       rows="2"
                       style={{paddingLeft: '50px', resize: 'vertical'}}
