@@ -7,6 +7,7 @@ import { userAPI } from '../../services/api';
 function KelolaProfil() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -57,13 +58,15 @@ function KelolaProfil() {
         name: formData.name,
         phone: formData.phone,
         skills: formData.skills.split(',').map(s => s.trim()).filter(s => s),
-        portfolio: formData.portfolio
+        portfolio: formData.portfolio,
+        description: formData.description
       };
       
       const response = await userAPI.updateProfile(dataToSend);
       if (response.data.success) {
+        setIsEditing(false);
         alert('Profil berhasil diperbarui!');
-        navigate('/freelancer/dashboard');
+        fetchProfile(); // Refresh data
       }
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -90,83 +93,141 @@ function KelolaProfil() {
       </div>
 
       <div className="container">
-        <h2 className="mb-20">Kelola Profil</h2>
+        <div className="dashboard-header">
+          <h2>Profil Freelancer</h2>
+          <p>Kelola informasi profil dan keahlian Anda</p>
+        </div>
 
-        <div style={{maxWidth: '800px', margin: '0 auto'}}>
-          <div className="card">
+        <div className="profile-container">
+          {/* Profile Header Card */}
+          <div className="card profile-header-card">
+            <div className="profile-avatar-section">
+              <div className="profile-avatar freelancer-avatar">
+                <span className="avatar-text">{formData.name?.charAt(0) || 'F'}</span>
+              </div>
+              <div className="profile-header-info">
+                <h2>{formData.name}</h2>
+                <p>{formData.email}</p>
+                <span className="profile-badge freelancer-badge">✨ Freelancer</span>
+              </div>
+            </div>
+            <button 
+              className={`btn ${isEditing ? 'btn-secondary' : 'btn-primary'}`}
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? '❌ Batal Edit' : '✏️ Edit Profil'}
+            </button>
+          </div>
+
+          {/* Profile Form Card */}
+          <div className="card profile-form-card">
+            <h3>Informasi Pribadi</h3>
             <form onSubmit={handleSubmit}>
-              <div className="input-group">
-                <label>Nama Lengkap</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  required
-                />
+              <div className="profile-form-grid">
+                <div className="input-group">
+                  <label>Nama Lengkap</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">👤</span>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      disabled={!isEditing}
+                      style={{paddingLeft: '50px'}}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label>Email</label>
+                  <div className="input-wrapper input-disabled">
+                    <span className="input-icon">📧</span>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      disabled
+                      style={{paddingLeft: '50px'}}
+                      title="Email tidak dapat diubah"
+                    />
+                  </div>
+                  <small style={{color: 'var(--text-secondary)', fontSize: '0.85em', marginTop: '4px', display: 'block'}}>
+                    Email tidak dapat diubah untuk keamanan akun
+                  </small>
+                </div>
+
+                <div className="input-group">
+                  <label>Nomor Telepon</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">📱</span>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      disabled={!isEditing}
+                      style={{paddingLeft: '50px'}}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label>Link Portfolio</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">🔗</span>
+                    <input
+                      type="url"
+                      value={formData.portfolio}
+                      onChange={(e) => setFormData({...formData, portfolio: e.target.value})}
+                      disabled={!isEditing}
+                      style={{paddingLeft: '50px'}}
+                      placeholder="https://portfolio-anda.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="input-group full-width">
+                  <label>Keahlian</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">⚡</span>
+                    <input
+                      type="text"
+                      value={formData.skills}
+                      onChange={(e) => setFormData({...formData, skills: e.target.value})}
+                      disabled={!isEditing}
+                      style={{paddingLeft: '50px'}}
+                      placeholder="Contoh: Web Development, UI/UX Design, Content Writing"
+                      required
+                    />
+                  </div>
+                  <small style={{color: 'var(--text-secondary)', fontSize: '0.85em', marginTop: '4px', display: 'block'}}>
+                    Pisahkan keahlian dengan koma
+                  </small>
+                </div>
+
+                <div className="input-group full-width">
+                  <label>Deskripsi Profil</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon" style={{alignSelf: 'flex-start', paddingTop: '14px'}}>📝</span>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      disabled={!isEditing}
+                      rows="4"
+                      style={{paddingLeft: '50px', resize: 'vertical', minHeight: '100px'}}
+                      placeholder="Ceritakan tentang keahlian dan pengalaman Anda sebagai freelancer..."
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="input-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  required
-                  disabled
-                  style={{backgroundColor: '#f5f5f5', cursor: 'not-allowed'}}
-                  title="Email tidak dapat diubah"
-                />
-              </div>
-
-              <div className="input-group">
-                <label>Nomor Telepon</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div className="input-group">
-                <label>Deskripsi Profil</label>
-                <textarea
-                  rows="4"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="Ceritakan tentang keahlian dan pengalaman Anda..."
-                ></textarea>
-              </div>
-
-              <div className="input-group">
-                <label>Keahlian (pisahkan dengan koma)</label>
-                <input
-                  type="text"
-                  value={formData.skills}
-                  onChange={(e) => setFormData({...formData, skills: e.target.value})}
-                  placeholder="Contoh: Design, Web Development, Content Writing"
-                  required
-                />
-              </div>
-
-              <div className="input-group">
-                <label>Link Portfolio (Opsional)</label>
-                <input
-                  type="url"
-                  value={formData.portfolio}
-                  onChange={(e) => setFormData({...formData, portfolio: e.target.value})}
-                  placeholder="https://..."
-                />
-              </div>
-
-              <div className="flex gap-10">
-                <button type="button" className="btn btn-secondary" onClick={() => navigate('/freelancer/dashboard')}>
-                  Batal
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Simpan Perubahan
-                </button>
-              </div>
+              {isEditing && (
+                <div className="profile-form-actions">
+                  <button type="submit" className="btn btn-primary">
+                    💾 Simpan Perubahan
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>

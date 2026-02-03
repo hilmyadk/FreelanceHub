@@ -276,6 +276,14 @@
   font-weight: 600;
 }
 
+.freelancer-badge {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.freelancer-avatar {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
 .profile-form-card {
   margin-bottom: 24px;
   padding: 32px;
@@ -310,6 +318,27 @@
   opacity: 0.8;
   color: var(--text-secondary);
   border-color: var(--border-color);
+}
+
+/* Special styling for disabled inputs with wrapper */
+.input-disabled input {
+  background: rgba(128, 128, 128, 0.1) !important;
+  cursor: not-allowed !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .input-disabled input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .profile-form-grid input:disabled,
+[data-theme="dark"] .profile-form-grid textarea:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .profile-form-actions {
