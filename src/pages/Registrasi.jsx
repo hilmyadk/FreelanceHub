@@ -34,21 +34,25 @@ function Registrasi() {
         return;
       }
       
-      // Prepare data for API
+      // Prepare data for registration
       const registrationData = {
-        ...formData,
-        // Send filename only if file exists (temporary until file upload is implemented)
-        cvFile: formData.cvFile ? formData.cvFile.name : ''
+        name: formData.nama,
+        email: formData.email,
+        password: formData.password,
+        role: formData.jenisAkun,
+        phone: formData.noTelp
       };
+
+      // Add freelancer-specific fields if applicable
+      if (formData.jenisAkun === 'freelancer') {
+        registrationData.skills = formData.deskripsi ? [formData.deskripsi] : [];
+        // Note: CV file upload will be handled separately in profile page
+      }
 
       // Register user
       const response = await authAPI.register(registrationData);
       
       if (response.data.success) {
-        // Save token and user data
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        
         // Show success message
         alert(response.data.message || 'Registrasi berhasil!');
         

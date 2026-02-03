@@ -1,58 +1,104 @@
-import axios from 'axios';
+// API Service - Pure LocalStorage (No Backend)
+// Menggantikan semua API calls dengan localStorage operations
 
-// Create axios instance with base configuration
-const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+import {
+  register as registerUser,
+  login as loginUser,
+  logout as logoutUser,
+  getCurrentUser,
+  isLoggedIn,
+  hasRole,
+  updateProfile as updateUserProfile,
+  changePassword as changeUserPassword,
+  getUserById as getUser,
+  getAllUsers,
+  getUsersByRole,
+  deleteUser,
+  initializeApp
+} from './localStorage';
 
-// Add token to requests automatically
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// Initialize app saat pertama kali load
+initializeApp();
 
-// Handle response errors globally
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Jangan redirect jika error berasal dari login (password salah)
-      if (error.config && error.config.url && error.config.url.includes('/auth/login')) {
-        return Promise.reject(error);
-      }
-
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/';
-    }
-    return Promise.reject(error);
-  }
-);
+// Simulate async behavior untuk konsistensi dengan API calls sebelumnya
+const asyncWrapper = (fn) => {
+  return (...args) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          const result = fn(...args);
+          if (result.success === false) {
+            reject({ response: { data: { message: result.message } } });
+          } else {
+            resolve({ data: result });
+          }
+        } catch (error) {
+          reject({ response: { data: { message: error.message } } });
+        }
+      }, 100); // Simulate network delay
+    });
+  };
+};
 
 // Auth endpoints
 export const authAPI = {
-  register: (data) => API.post('/auth/register', data),
-  login: (data) => API.post('/auth/login', data),
-  getMe: () => API.get('/auth/me')
+  register: asyncWrapper(registerUser),
+  login: asyncWrapper(({ email, password, role }) => loginUser(email, password, role)),
+  logout: asyncWrapper(logoutUser),
+  getMe: asyncWrapper(() => {
+    const user = getCurrentUser();
+    if (!user) {
+      return { success: false, message: 'Tidak ada user yang login' };
+    }
+    return { success: true, user };
+  }),
+  isLoggedIn,
+  hasRole
 };
 
 // User endpoints
 export const userAPI = {
-  getProfile: () => API.get('/users/profile'),
-  updateProfile: (data) => API.put('/users/profile', data),
-  getUserById: (id) => API.get(`/users/${id}`)
+  getProfile: asyncWrapper(() => {
+    const user = getCurrentUser();
+    if (!user) {
+      return { success: false, message: 'Tidak ada user yang login' };
+    }
+    return { success: true, user };
+  }),
+  updateProfile: asyncWrapper((data) => {
+    const user = getCurrentUser();
+    if (!user) {
+      return { success: false, message: 'Tidak ada user yang login' };
+    }
+    return updateUserProfile(user.id, data);
+  }),
+  changePassword: asyncWrapper((oldPassword, newPassword) => {
+    const user = getCurrentUser();
+    if (!user) {
+      return { success: false, message: 'Tidak ada user yang login' };
+    }
+    return changeUserPassword(user.id, oldPassword, newPassword);
+  }),
+  getUserById: asyncWrapper((id) => {
+    const user = getUser(id);
+    if (!user) {
+      return { success: false, message: 'User tidak ditemukan' };
+    }
+    return { success: true, user };
+  }),
+  getAllUsers: asyncWrapper(() => {
+    return { success: true, users: getAllUsers() };
+  }),
+  getUsersByRole: asyncWrapper((role) => {
+    return { success: true, users: getUsersByRole(role) };
+  }),
+  deleteUser: asyncWrapper(deleteUser)
 };
 
-export default API;
+// Export utility functions
+export { getCurrentUser, isLoggedIn, hasRole };
+
+export default {
+  authAPI,
+  userAPI
+};

@@ -20,21 +20,14 @@ function LoginCustomer() {
     setLoading(true);
     
     try {
-      const response = await authAPI.login(formData);
+      const response = await authAPI.login({
+        email: formData.email,
+        password: formData.password,
+        role: 'customer' // Validate customer role
+      });
       
       if (response.data.success) {
-        // Check if user is customer
-        if (response.data.user.role !== 'customer') {
-          setError('Login ini khusus untuk Customer. Silakan gunakan login Freelancer.');
-          setLoading(false);
-          return;
-        }
-        
-        // Save token and user data
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        
-        // Redirect to dashboard
+        // Redirect to customer dashboard
         navigate('/customer/dashboard');
       }
     } catch (err) {

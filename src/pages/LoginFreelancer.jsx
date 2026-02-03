@@ -20,21 +20,14 @@ function LoginFreelancer() {
     setLoading(true);
     
     try {
-      const response = await authAPI.login(formData);
+      const response = await authAPI.login({
+        email: formData.email,
+        password: formData.password,
+        role: 'freelancer' // Validate freelancer role
+      });
       
       if (response.data.success) {
-        // Check if user is freelancer
-        if (response.data.user.role !== 'freelancer') {
-          setError('Login ini khusus untuk Freelancer. Silakan gunakan login Customer.');
-          setLoading(false);
-          return;
-        }
-        
-        // Save token and user data
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        
-        // Redirect to dashboard
+        // Redirect to freelancer dashboard
         navigate('/freelancer/dashboard');
       }
     } catch (err) {
